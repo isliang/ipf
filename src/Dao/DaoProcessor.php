@@ -101,12 +101,12 @@ class DaoProcessor
         $callback = function ($params) {
             return is_array($params) ? current($params) : null;
         };
-        $this->find($where, 0, 1, null, null, $force_write, $callback);
+        return $this->find($where, 0, 1, null, null, $force_write, $callback);
     }
 
     public function findByIds($pks, $force_write = false, $callback = null)
     {
-        $this->find([$this->dao_info->getPk() => $pks], null, null, null, null, $force_write, $callback);
+        return $this->find([$this->dao_info->getPk() => $pks], null, null, null, null, $force_write, $callback);
     }
 
 
@@ -115,7 +115,7 @@ class DaoProcessor
         $callback = function ($params) {
             return is_array($params) ? current($params) : null;
         };
-        $this->findByIds([$pk], $force_write, $callback);
+        return $this->findByIds([$pk], $force_write, $callback);
     }
 
     /**
@@ -242,7 +242,7 @@ class DaoProcessor
             $data = is_array($params) ? current($params) : [];
             return $data['c'] ?: 0;
         };
-        $this->find($where, 0, 1, null, $field, false, $callback);
+        return $this->find($where, 0, 1, null, $field, false, $callback);
     }
 
     /**

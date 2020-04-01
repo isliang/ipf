@@ -53,51 +53,51 @@ abstract class BaseDao
 
     public function find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false)
     {
-        $this->processor->find($where, $offset, $limit, $order, $fields, $force_write);
+        return $this->processor->find($where, $offset, $limit, $order, $fields, $force_write);
     }
 
     public function findOne($where, $force_write = false)
     {
-        $this->processor->findOne($where, $force_write);
+        return $this->processor->findOne($where, $force_write);
     }
 
     public function findByIds($pks, $force_write = false)
     {
-        $this->processor->findByIds($pks, $force_write);
+        return $this->processor->findByIds($pks, $force_write);
     }
 
     public function findById($pk, $force_write = false)
     {
-        $this->processor->findById($pk, $force_write);
+        return $this->processor->findById($pk, $force_write);
     }
 
     public function insert($params, $is_ignore = false)
     {
-        $this->processor->insert($params, $is_ignore);
+        return $this->processor->insert($params, $is_ignore);
     }
 
     public function insertOnDuplicateKeyUpdate($params)
     {
-        $this->processor->insertOnDuplicateKeyUpdate($params);
+        return $this->processor->insertOnDuplicateKeyUpdate($params);
     }
 
     public function update($params, $where)
     {
-        $this->processor->update($params, $where);
+        return $this->processor->update($params, $where);
     }
 
     public function increase($where, $field, $count, $increase = true)
     {
-        $this->processor->increase($where, $field, $count, $increase);
+        return $this->processor->increase($where, $field, $count, $increase);
     }
 
     public function delete($where)
     {
-        $this->processor->delete($where);
+        return $this->processor->delete($where);
     }
 
     public function getCount($where)
     {
-        $this->processor->getCount($where);
+        return $this->processor->getCount($where);
     }
 }
