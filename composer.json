@@ -1,0 +1,38 @@
+{
+  "name": "isliang/ipf",
+  "description": "it is a simple php framework",
+  "version": "1.0.0",
+  "type": "library",
+  "keywords": [
+    "php",
+    "framework"
+  ],
+  "license": [
+    "Apache-2.0"
+  ],
+  "authors": [
+    {
+      "name": "yesuhuangsi",
+      "email": "yesuhuangsi@163.com",
+      "homepage": "https://github.com/isliang",
+      "role": "Owner"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Ipf\\": "src/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
+  },
+  "require": {
+    "php": "^7.0",
+    "guzzlehttp/guzzle": "~6.0",
+    "monolog/monolog": "^1.0",
+    "nikic/fast-route": "1.1.0"
+  }
+}
