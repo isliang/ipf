@@ -27,7 +27,7 @@ class MysqlPool
     public function __construct($name)
     {
         $config = ConfigLoader::getConfig('database', $name);
-        ConfigChecker::checkMysqlConfig($name, $config);
+        ConfigChecker::checkPdoConfig($name, $config);
         $this->config = $config;
     }
 
