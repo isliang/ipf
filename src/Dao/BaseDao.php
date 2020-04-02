@@ -26,14 +26,14 @@ abstract class BaseDao
     /**
      * @var MysqlPool
      */
-    private static $pool_read;
+    private $pool_read;
 
     /**
      * @var MysqlPool
      */
-    private static $pool_write;
+    private $pool_write;
 
-    private static $pool_initialized = false;
+    private static $instance = null;
 
     /**
      * @return DaoInfo
@@ -43,12 +43,18 @@ abstract class BaseDao
     public function __construct()
     {
         $this->dao_info = $this->getDaoInfo();
-        if (empty(self::$pool_initialized)) {
-            self::$pool_read = new MysqlPool($this->dao_info->getSlaveDsn());
-            self::$pool_write = new MysqlPool($this->dao_info->getMasterDsn());
-            self::$pool_initialized = true;
+        $this->pool_read = new MysqlPool($this->dao_info->getSlaveDsn());
+        $this->pool_write = new MysqlPool($this->dao_info->getMasterDsn());
+        $this->processor = new DaoProcessor($this->dao_info, $this->pool_read, $this->pool_write);
+    }
+
+    public static function getInstance()
+    {
+        if (empty(self::$instance)) {
+            $class = get_called_class();
+            self::$instance = new $class;
         }
-        $this->processor = new DaoProcessor($this->dao_info, self::$pool_read, self::$pool_write);
+        return self::$instance;
     }
 
     public function find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false)
