@@ -9,8 +9,23 @@
 namespace Ipf\Dao;
 
 use Ipf\Constant\CommConst;
+use Ipf\Exception\MethodNotExistException;
 use Ipf\Pool\MysqlPool;
 
+/**
+ * Class BaseDao
+ * @package Ipf\Dao
+ * @method find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false)
+ * @method findOne($where, $force_write = false)
+ * @method findByIds($pks, $force_write = false)
+ * @method findById($pk, $force_write = false)
+ * @method insert($params, $is_ignore = false)
+ * @method insertOnDuplicateKeyUpdate($params)
+ * @method update($params, $where)
+ * @method increase($where, $field, $count, $increase = true)
+ * @method delete($where)
+ * @method getCount($where)
+ */
 abstract class BaseDao
 {
     /**
@@ -33,7 +48,7 @@ abstract class BaseDao
      */
     private $pool_write;
 
-    private static $instance = null;
+    private static $instance = [];
 
     /**
      * @return DaoInfo
@@ -50,60 +65,24 @@ abstract class BaseDao
 
     public static function getInstance()
     {
-        if (empty(self::$instance)) {
-            $class = get_called_class();
-            self::$instance = new $class;
+        $class = get_called_class();
+        if (empty(self::$instance[$class])) {
+            self::$instance[$class] = new $class;
         }
-        return self::$instance;
+        return self::$instance[$class];
     }
 
-    public function find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false)
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws MethodNotExistException
+     */
+    public function __call($name, $arguments)
     {
-        return $this->processor->find($where, $offset, $limit, $order, $fields, $force_write);
-    }
-
-    public function findOne($where, $force_write = false)
-    {
-        return $this->processor->findOne($where, $force_write);
-    }
-
-    public function findByIds($pks, $force_write = false)
-    {
-        return $this->processor->findByIds($pks, $force_write);
-    }
-
-    public function findById($pk, $force_write = false)
-    {
-        return $this->processor->findById($pk, $force_write);
-    }
-
-    public function insert($params, $is_ignore = false)
-    {
-        return $this->processor->insert($params, $is_ignore);
-    }
-
-    public function insertOnDuplicateKeyUpdate($params)
-    {
-        return $this->processor->insertOnDuplicateKeyUpdate($params);
-    }
-
-    public function update($params, $where)
-    {
-        return $this->processor->update($params, $where);
-    }
-
-    public function increase($where, $field, $count, $increase = true)
-    {
-        return $this->processor->increase($where, $field, $count, $increase);
-    }
-
-    public function delete($where)
-    {
-        return $this->processor->delete($where);
-    }
-
-    public function getCount($where)
-    {
-        return $this->processor->getCount($where);
+        if (method_exists($this->processor, $name)) {
+            return call_user_func_array([$this->processor, $name], $arguments);
+        }
+        throw new MethodNotExistException(get_called_class(), $name);
     }
 }
