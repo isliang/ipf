@@ -38,7 +38,7 @@ class DaoInfo
     /**
      * @var bool
      */
-    private $skip_cache;
+    private $skip_cache = false;
 
     /**
      * @return string
