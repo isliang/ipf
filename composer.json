@@ -34,6 +34,7 @@
     "ext-memcached": ">=3.0",
     "guzzlehttp/guzzle": "~6.0",
     "monolog/monolog": "^1.0",
-    "nikic/fast-route": "1.1.0"
+    "nikic/fast-route": "1.1.0",
+    "predis/predis": "^1.1.1"
   }
 }

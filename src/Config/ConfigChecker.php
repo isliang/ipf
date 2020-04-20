@@ -70,7 +70,7 @@ class ConfigChecker
         if (empty($param) || !is_array($param)) {
             throw new RedisConfigNotFoundException($name);
         }
-        if (!isset($param['host']) || !isset($param['port']) || !isset($param['serialize']) || !isset($param['options'])) {
+        if (!isset($param['client']) || !isset($param['options'])) {
             throw new RedisConfigFormatErrorException();
         }
     }

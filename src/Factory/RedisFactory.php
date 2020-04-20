@@ -1,4 +1,5 @@
 <?php
+
 /**
  * User: isliang
  * Date: 2019-09-13
@@ -10,8 +11,9 @@ namespace Ipf\Factory;
 
 use Ipf\Config\ConfigChecker;
 use Ipf\Config\ConfigLoader;
+use Predis\Client;
 
-class MemcachedFactory
+class RedisFactory
 {
     private static $instance = [];
 
@@ -20,12 +22,11 @@ class MemcachedFactory
         return self::$instance[$name] ?
             self::$instance[$name] :
             (function () use ($name) {
-                $config = ConfigLoader::getConfig('memcached', $name);
-                ConfigChecker::checkMemcachedConfig($name, $config);
-                $memcached = new \Memcached($name);
-                $memcached->addServers($config);
-                self::$instance[$name] = $memcached;
-                return $memcached;
+                $config = ConfigLoader::getConfig('redis', $name);
+                ConfigChecker::checkRedisConfig($name, $config);
+                $client = new Client($config['client'], $config['options']);
+                self::$instance[$name] = $client;
+                return $client;
             })();
     }
 }
