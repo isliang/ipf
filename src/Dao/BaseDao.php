@@ -60,7 +60,10 @@ abstract class BaseDao
         $this->dao_info = $this->getDaoInfo();
         $this->pool_read = new MysqlPool($this->dao_info->getSlaveDsn());
         $this->pool_write = new MysqlPool($this->dao_info->getMasterDsn());
-        $this->processor = new DaoProcessor($this->dao_info, $this->pool_read, $this->pool_write);
+        $this->processor = $this->dao_info->isSkipCache() ?
+            new DaoProcessor($this->dao_info, $this->pool_read, $this->pool_write) :
+            new CachedDaoProcessor($this->dao_info, $this->pool_read, $this->pool_write)
+        ;
     }
 
     public static function getInstance()

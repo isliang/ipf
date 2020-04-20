@@ -10,6 +10,8 @@ namespace Ipf\Config;
 
 use Ipf\Exception\LogConfigFormatErrorException;
 use Ipf\Exception\LogConfigNotFoundException;
+use Ipf\Exception\MemcachedConfigFormatErrorException;
+use Ipf\Exception\MemcachedConfigNotFoundException;
 use Ipf\Exception\MysqlConfigFormatErrorException;
 use Ipf\Exception\MysqlConfigNotFoundException;
 use Ipf\Exception\PdoConfigFormatErrorException;
@@ -70,6 +72,19 @@ class ConfigChecker
         }
         if (!isset($param['host']) || !isset($param['port']) || !isset($param['serialize']) || !isset($param['options'])) {
             throw new RedisConfigFormatErrorException();
+        }
+    }
+
+    public static function checkMemcachedConfig($name, $param)
+    {
+        if (empty($param) || !is_array($param)) {
+            throw new MemcachedConfigNotFoundException($name);
+        }
+        foreach ($param as $item) {
+            list($domain, $port, $weight) = $item;
+            if (empty($domain) || empty($port)) {
+                throw new MemcachedConfigFormatErrorException();
+            }
         }
     }
 }

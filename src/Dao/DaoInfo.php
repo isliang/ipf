@@ -36,6 +36,11 @@ class DaoInfo
     private $pk;
 
     /**
+     * @var bool
+     */
+    private $skip_cache;
+
+    /**
      * @return string
      */
     public function getTableName(): string
@@ -113,5 +118,21 @@ class DaoInfo
     public function setPk(string $pk)
     {
         $this->pk = $pk;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkipCache(): bool
+    {
+        return $this->skip_cache;
+    }
+
+    /**
+     * @param bool $skip_cache
+     */
+    public function setSkipCache(bool $skip_cache): void
+    {
+        $this->skip_cache = $skip_cache;
     }
 }
