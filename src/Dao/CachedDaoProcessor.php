@@ -9,7 +9,8 @@
 namespace Ipf\Dao;
 
 use Ipf\Constant\CommConst;
-use Ipf\Utils\SqlBuilderUtils;
+use Ipf\Factory\MemcachedFactory;
+use Ipf\Factory\RedisFactory;
 
 class CachedDaoProcessor
 {
@@ -17,14 +18,82 @@ class CachedDaoProcessor
      * @var DaoProcessor
      */
     private $processor;
+    /**
+     * @var DaoInfo
+     */
+    private $dao_info;
+
+    /**
+     * @var \Memcached
+     */
+    private $memcache;
+
+    /**
+     * @var \Predis\Client
+     */
+    private $redis;
 
     public function __construct($dao_info, $pool_read, $pool_write)
     {
+        $this->dao_info = $dao_info;
+        $this->memcache = MemcachedFactory::getInstance();
+        $this->redis = RedisFactory::getInstance();
         $this->processor = new DaoProcessor($dao_info, $pool_read, $pool_write);
     }
 
-    //
+    public function buildMemcachedKey()
+    {
+        //表名+更新时间+查询参数
+        $arr = [
+            $this->dao_info->getDbName(),
+            $this->dao_info->getTableName(),
+            'method',
+            $this->getUpdateTime(),
+            json_encode(func_get_args()),
+        ];
 
+        return implode('|', $arr);
+    }
+
+    public function getUpdateTime()
+    {
+        $key = $this->dao_info->getDbName() . '|' .
+            $this->dao_info->getTableName();
+        $info = $this->redis->get($key);
+        if (empty($info)) {
+            $cache_tag_dao = CacheTagDao::getInstance();
+            $info = $cache_tag_dao->findOne([
+                'database' => $this->dao_info->getDbName(),
+                'table' => $this->dao_info->getTableName(),
+            ]);
+            if (empty($info)) {
+                $info = [
+                    'database' => $this->dao_info->getDbName(),
+                    'table' => $this->dao_info->getTableName(),
+                    'update_time' => intval(microtime(true) * 1000),
+                ];
+                $cache_tag_dao->insert($info);
+            }
+            $this->redis->set($key, $info['update_time']);
+            return $info['update_time'];
+        }
+        return  $info;
+    }
+
+    public function updateUpdateTime()
+    {
+        $key = $this->dao_info->getDbName() . '|' .
+            $this->dao_info->getTableName();
+        $cache_tag_dao = CacheTagDao::getInstance();
+        $info = [
+            'database' => $this->dao_info->getDbName(),
+            'table' => $this->dao_info->getTableName(),
+            'update_time' => intval(microtime(true) * 1000),
+        ];
+        $cache_tag_dao->insertOnDuplicateKeyUpdate($info);
+        $this->redis->set($key, $info['update_time']);
+        return  $info;
+    }
     /**
      * @param $where
      * @param $offset
@@ -39,23 +108,15 @@ class CachedDaoProcessor
      */
     public function find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false, $callback = null)
     {
-        $params = [];
-        $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
-        if (!empty($where_info)) {
-            $where_sql = $where_info['sql'];
-            $params = array_merge($params, $where_info['values']);
+        $memcached_key = call_user_func_array([$this, 'buildMemcachedKey'], func_get_args());
+        $res = $this->memcache->get($memcached_key);
+        if ($res) {
+            return json_decode($res, true);
+        } else {
+            $info = $this->processor->find($where, $offset, $limit, $order, $fields, $force_write, $callback);
+            $this->memcache->set($memcached_key, json_encode($info));
+            return $info;
         }
-
-        $offset = is_null($offset) ? CommConst::DEFAULT_SQL_OFFSET : $offset;
-        $limit = is_null($limit) ? CommConst::DEFAULT_SQL_LIMIT : $limit;
-
-        $sql = "SELECT " . SqlBuilderUtils::buildFields($fields) .
-            " FROM " . $this->dao_info->getTableName() .
-            $where_sql .
-            SqlBuilderUtils::buildOrder($order) .
-            " LIMIT {$offset}, {$limit}";
-        return $this->executeSql($sql, $params, $force_write, $callback);
     }
 
     public function findOne($where, $force_write = false)
@@ -80,6 +141,19 @@ class CachedDaoProcessor
         return $this->findByIds([$pk], $force_write, $callback);
     }
 
+    public function getCount($where)
+    {
+        $memcached_key = call_user_func_array([$this, 'buildMemcachedKey'], func_get_args());
+        $res = $this->memcache->get($memcached_key);
+        if ($res) {
+            return json_decode($res, true);
+        } else {
+            $info = $this->processor->getCount($where);
+            $this->memcache->set($memcached_key, json_encode($info));
+            return $info;
+        }
+    }
+
     /**
      * @param $params
      * @param $is_ignore
@@ -89,38 +163,11 @@ class CachedDaoProcessor
      */
     public function insert($params, $is_ignore = false)
     {
-        if (empty($params) || !is_array($params)) {
-            return false;
+        $res = $this->processor->insert($params, $is_ignore);
+        if ($res) {
+            $this->updateUpdateTime();
         }
-        $values = [];
-        $fields = [];
-        if (is_array(current($params))) {
-            $fields_get = true;
-            foreach ($params as $param) {
-                foreach ($param as $k => $v) {
-                    if ($fields_get) {
-                        $fields[] = $k;
-                    }
-                    $values[] = $v;
-                }
-                $fields_get = false;
-            }
-            $value_sql = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
-            $value_sql = implode(',', array_fill(0, count($params), $value_sql));
-        } else {
-            foreach ($params as $k => $v) {
-                $fields[] = $k;
-                $values[] = $v;
-            }
-            $value_sql = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
-        }
-
-        $ignore = $is_ignore ? 'IGNORE' : '';
-        $sql = "INSERT {$ignore} INTO " . $this->dao_info->getTableName() .
-            '(' . SqlBuilderUtils::buildFields($fields) . ') values '
-            . $value_sql;
-
-        return $this->executeSql($sql, $values);
+        return $res;
     }
 
     /**
@@ -130,23 +177,11 @@ class CachedDaoProcessor
      */
     public function insertOnDuplicateKeyUpdate($params)
     {
-        if (empty($params) || !is_array($params)) {
-            return false;
+        $res = $this->processor->insertOnDuplicateKeyUpdate($params);
+        if ($res) {
+            $this->updateUpdateTime();
         }
-        $values = [];
-        $fields = [];
-        if (is_array(current($params))) {
-            return false;
-        }
-        foreach ($params as $k => $v) {
-            $fields[] = $k;
-            $values[] = $v;
-        }
-        $value_sql = '(' . implode(',', array_fill(0, count($fields), '?')) . ')';
-        $sql = "INSERT INTO " . $this->dao_info->getTableName() .
-            '(' . SqlBuilderUtils::buildFields($fields) . ') values '
-            . $value_sql . ' ON DUPLICATE KEY UPDATE ' . SqlBuilderUtils::buildWhereFields($fields);
-        return $this->executeSql($sql, array_merge($values, $values));
+        return $res;
     }
 
     /**
@@ -158,25 +193,11 @@ class CachedDaoProcessor
      */
     public function update($params, $where)
     {
-        if (empty($params) || !is_array($where)) {
-            return false;
+        $res = $this->processor->update($params, $where);
+        if ($res) {
+            $this->updateUpdateTime();
         }
-        $fields = [];
-        $values = [];
-        foreach ($params as $k => $v) {
-            $fields[] = $k;
-            $values[] = $v;
-        }
-        $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
-        if (!empty($where_info)) {
-            $where_sql = $where_info['sql'];
-            $values = array_merge($values, $where_info['values']);
-        }
-
-        $sql = "UPDATE " . $this->dao_info->getTableName() . " SET "
-            . SqlBuilderUtils::buildWhereFields($fields) . $where_sql;
-        return $this->executeSql($sql, $values);
+        return $res;
     }
 
     /**
@@ -187,24 +208,11 @@ class CachedDaoProcessor
      */
     public function delete($where)
     {
-        $where_info = SqlBuilderUtils::buildWhere($where);
-        if (empty($where_info)) {
-            return false;
+        $res = $this->processor->update($where);
+        if ($res) {
+            $this->updateUpdateTime();
         }
-        $where_sql = $where_info['sql'];
-        $params = $where_info['values'];
-        $sql = "DELETE FROM " . $this->dao_info->getTableName() . $where_sql;
-        return $this->executeSql($sql, $params);
-    }
-
-    public function getCount($where)
-    {
-        $field = "COUNT(1) as c";
-        $callback = function ($params) {
-            $data = is_array($params) ? current($params) : [];
-            return $data['c'] ?: 0;
-        };
-        return $this->find($where, 0, 1, null, $field, false, $callback);
+        return $res;
     }
 
     /**
@@ -217,20 +225,10 @@ class CachedDaoProcessor
      */
     public function increase($where, $field, $count, $increase = true)
     {
-        if (empty($field) || empty($count) || !is_array($where)) {
-            return false;
+        $res = $this->processor->increase($where, $field, $count, $increase);
+        if ($res) {
+            $this->updateUpdateTime();
         }
-        $count = abs(intval($count));
-        $values = [];
-        $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
-        if (!empty($where_info)) {
-            $where_sql = $where_info['sql'];
-            $values = $where_info['values'];
-        }
-
-        $sql = "UPDATE " . $this->dao_info->getTableName() . " SET "
-            . SqlBuilderUtils::buildUpdateFields([$field => $count], $increase) . $where_sql;
-        return $this->executeSql($sql, $values);
+        return $res;
     }
 }

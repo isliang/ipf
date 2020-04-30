@@ -66,6 +66,9 @@ abstract class BaseDao
         ;
     }
 
+    /**
+     * @return BaseDao
+     */
     public static function getInstance()
     {
         $class = get_called_class();
