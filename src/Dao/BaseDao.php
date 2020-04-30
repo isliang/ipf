@@ -19,12 +19,12 @@ use Ipf\Pool\MysqlPool;
  * @method findOne($where, $force_write = false)
  * @method findByIds($pks, $force_write = false)
  * @method findById($pk, $force_write = false)
+ * @method findCount($where)
  * @method insert($params, $is_ignore = false)
  * @method insertOnDuplicateKeyUpdate($params)
  * @method update($params, $where)
  * @method increase($where, $field, $count, $increase = true)
  * @method delete($where)
- * @method getCount($where)
  */
 abstract class BaseDao
 {

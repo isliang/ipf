@@ -9,6 +9,7 @@
 namespace Ipf\Dao;
 
 use Ipf\Constant\CommConst;
+use Ipf\Exception\MethodNotExistException;
 use Ipf\Factory\MemcachedFactory;
 use Ipf\Factory\RedisFactory;
 
@@ -33,21 +34,26 @@ class CachedDaoProcessor
      */
     private $redis;
 
+    /**
+     * @var CacheTagDao
+     */
+    private $cache_tag_dao;
+
     public function __construct($dao_info, $pool_read, $pool_write)
     {
         $this->dao_info = $dao_info;
         $this->memcache = MemcachedFactory::getInstance();
         $this->redis = RedisFactory::getInstance();
         $this->processor = new DaoProcessor($dao_info, $pool_read, $pool_write);
+        $this->cache_tag_dao = CacheTagDao::getInstance();
     }
 
-    public function buildMemcachedKey()
+    private function buildMemcachedKey()
     {
         //表名+更新时间+查询参数
         $arr = [
             $this->dao_info->getDbName(),
             $this->dao_info->getTableName(),
-            'method',
             $this->getUpdateTime(),
             json_encode(func_get_args()),
         ];
@@ -55,14 +61,17 @@ class CachedDaoProcessor
         return implode('|', $arr);
     }
 
-    public function getUpdateTime()
+    private function generateUpdateTime()
     {
-        $key = $this->dao_info->getDbName() . '|' .
-            $this->dao_info->getTableName();
-        $info = $this->redis->get($key);
+        return intval(microtime(true) * 1000);
+    }
+
+    private function getUpdateTime()
+    {
+        $key = $this->getRedisKey();
+        $update_time = $this->redis->get($key);
         if (empty($info)) {
-            $cache_tag_dao = CacheTagDao::getInstance();
-            $info = $cache_tag_dao->findOne([
+            $info = $this->cache_tag_dao->findOne([
                 'database' => $this->dao_info->getDbName(),
                 'table' => $this->dao_info->getTableName(),
             ]);
@@ -70,30 +79,43 @@ class CachedDaoProcessor
                 $info = [
                     'database' => $this->dao_info->getDbName(),
                     'table' => $this->dao_info->getTableName(),
-                    'update_time' => intval(microtime(true) * 1000),
+                    'update_time' => $this->generateUpdateTime(),
                 ];
-                $cache_tag_dao->insert($info);
+                $this->cache_tag_dao->insert($info);
             }
             $this->redis->set($key, $info['update_time']);
             return $info['update_time'];
         }
-        return  $info;
+        return  $update_time;
     }
 
-    public function updateUpdateTime()
+    private function getRedisKey()
     {
-        $key = $this->dao_info->getDbName() . '|' .
-            $this->dao_info->getTableName();
-        $cache_tag_dao = CacheTagDao::getInstance();
+        return $this->dao_info->getDbName() . '|' . $this->dao_info->getTableName();
+    }
+
+    private function updateUpdateTime()
+    {
+        $key = $this->getRedisKey();
         $info = [
             'database' => $this->dao_info->getDbName(),
             'table' => $this->dao_info->getTableName(),
-            'update_time' => intval(microtime(true) * 1000),
+            'update_time' => $this->generateUpdateTime(),
         ];
-        $cache_tag_dao->insertOnDuplicateKeyUpdate($info);
+        $this->cache_tag_dao->insertOnDuplicateKeyUpdate($info);
         $this->redis->set($key, $info['update_time']);
         return  $info;
     }
+    /**
+     * 缓存策略一
+     * memcache里缓存查询结果 key由database table
+     * 表更新时间存放在db中，并在redis中缓存
+     * 更新操作，包括插入和删除，成功之后，更新表更新时间(db+redis)
+     * 频繁的插入更改的情况下，缓存效率较低
+     *
+     *
+     */
+
     /**
      * @param $where
      * @param $offset
@@ -141,91 +163,22 @@ class CachedDaoProcessor
         return $this->findByIds([$pk], $force_write, $callback);
     }
 
-    public function getCount($where)
+    public function findCount($where, $force_write = false)
     {
-        $memcached_key = call_user_func_array([$this, 'buildMemcachedKey'], func_get_args());
-        $res = $this->memcache->get($memcached_key);
-        if ($res) {
-            return json_decode($res, true);
-        } else {
-            $info = $this->processor->getCount($where);
-            $this->memcache->set($memcached_key, json_encode($info));
-            return $info;
-        }
+        $field = "COUNT(1) as c";
+        $callback = function ($params) {
+            $data = is_array($params) ? current($params) : [];
+            return $data['c'] ?: 0;
+        };
+        return $this->find($where, 0, 1, null, $field, $force_write, $callback);
     }
 
-    /**
-     * @param $params
-     * @param $is_ignore
-     * @return array|bool|int|string
-     * @throws \Exception
-     * INSERT INTO test (`id`,`user_id`,`title`) values (?,?,?),(?,?,?)
-     */
-    public function insert($params, $is_ignore = false)
+    public function __call($method, $args)
     {
-        $res = $this->processor->insert($params, $is_ignore);
-        if ($res) {
-            $this->updateUpdateTime();
+        if (!method_exists($this->processor, $method)) {
+            throw new MethodNotExistException(get_called_class(), $method);
         }
-        return $res;
-    }
-
-    /**
-     * @param $params
-     * @return bool
-     * INSERT INTO test (`id`,`user_id`,`title`) values (?,?,?) ON DUPLICATE KEY UPDATE `id` = ?, `user_id` = ? ,`title` = ?
-     */
-    public function insertOnDuplicateKeyUpdate($params)
-    {
-        $res = $this->processor->insertOnDuplicateKeyUpdate($params);
-        if ($res) {
-            $this->updateUpdateTime();
-        }
-        return $res;
-    }
-
-    /**
-     * @param $params
-     * @param $where
-     * @return array|bool|int|string
-     * @throws \Exception
-     * UPDATE test SET `title` = ?, `user_id` = ? where id = 1
-     */
-    public function update($params, $where)
-    {
-        $res = $this->processor->update($params, $where);
-        if ($res) {
-            $this->updateUpdateTime();
-        }
-        return $res;
-    }
-
-    /**
-     * @param $where
-     * @return array|bool|int|string
-     * @throws \Exception
-     * DELETE FROM test WHERE id = 1
-     */
-    public function delete($where)
-    {
-        $res = $this->processor->update($where);
-        if ($res) {
-            $this->updateUpdateTime();
-        }
-        return $res;
-    }
-
-    /**
-     * @param $where
-     * @param $field
-     * @param $count
-     * @param bool $increase
-     * @return bool
-     * increase or decrease field by count (if param increase is false)
-     */
-    public function increase($where, $field, $count, $increase = true)
-    {
-        $res = $this->processor->increase($where, $field, $count, $increase);
+        $res = call_user_func_array([$this->processor, $method], $args);
         if ($res) {
             $this->updateUpdateTime();
         }

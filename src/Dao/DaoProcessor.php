@@ -235,7 +235,7 @@ class DaoProcessor
         return $this->executeSql($sql, $params);
     }
 
-    public function getCount($where)
+    public function findCount($where)
     {
         $field = "COUNT(1) as c";
         $callback = function ($params) {
