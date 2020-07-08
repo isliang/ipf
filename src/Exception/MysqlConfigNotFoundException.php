@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019/9/17
  * Time: 11:13
- * Email: wslhdu@163.com
+ * Email: wslhdu@163.com.
  **/
 
 namespace Ipf\Exception;

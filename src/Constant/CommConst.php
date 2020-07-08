@@ -3,14 +3,14 @@
  * User: isliang
  * Date: 2019-09-14
  * Time: 10:53
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Constant;
 
 class CommConst
 {
-    const SIZE_RESPONSE_WRITE_BUFFER = 1048576;//1024*1024
+    const SIZE_RESPONSE_WRITE_BUFFER = 1048576; //1024*1024
 
     const DEFAULT_SQL_OFFSET = 0;
 

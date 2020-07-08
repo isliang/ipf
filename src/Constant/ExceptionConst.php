@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019-09-13
  * Time: 14:45
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Constant;

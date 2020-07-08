@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019-09-13
  * Time: 15:35
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Factory;
@@ -20,11 +20,13 @@ class LogFactory
     /**
      * @param $name
      * @param bool $reload
+     *
      * @return Logger
      */
     public static function getInstance($name, $reload = false)
     {
-        $today = date("Ymd");
+        $today = date('Ymd');
+
         return self::$logger_list[$name][$today] && empty($reload) ?
             self::$logger_list[$name][$today] :
             (function () use ($name, $reload, $today) {
@@ -33,12 +35,13 @@ class LogFactory
                 $logger = new Logger($config['name']);
                 $logger->pushHandler(
                     new StreamHandler(
-                        $config['file_path'] . '.' . $today,
+                        $config['file_path'].'.'.$today,
                         Logger::INFO
                     )
                 );
                 self::$logger_list[$name] = [];
                 self::$logger_list[$name][$today] = $logger;
+
                 return $logger;
             })();
     }

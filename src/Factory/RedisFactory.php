@@ -4,7 +4,7 @@
  * User: isliang
  * Date: 2019-09-13
  * Time: 15:35
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Factory;
@@ -17,7 +17,7 @@ class RedisFactory
 {
     private static $instance = [];
 
-    public static function getInstance($name = "default")
+    public static function getInstance($name = 'default')
     {
         return self::$instance[$name] ?
             self::$instance[$name] :
@@ -26,6 +26,7 @@ class RedisFactory
                 ConfigChecker::checkRedisConfig($name, $config);
                 $client = new Client($config['client'], $config['options']);
                 self::$instance[$name] = $client;
+
                 return $client;
             })();
     }
