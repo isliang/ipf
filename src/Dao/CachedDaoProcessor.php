@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019-09-13
  * Time: 16:02
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Dao;
@@ -73,47 +73,49 @@ class CachedDaoProcessor
         if (empty($info)) {
             $info = $this->cache_tag_dao->findOne([
                 'database' => $this->dao_info->getDbName(),
-                'table' => $this->dao_info->getTableName(),
+                'table'    => $this->dao_info->getTableName(),
             ]);
             if (empty($info)) {
                 $info = [
-                    'database' => $this->dao_info->getDbName(),
-                    'table' => $this->dao_info->getTableName(),
+                    'database'    => $this->dao_info->getDbName(),
+                    'table'       => $this->dao_info->getTableName(),
                     'update_time' => $this->generateUpdateTime(),
                 ];
                 $this->cache_tag_dao->insert($info);
             }
             $this->redis->set($key, $info['update_time']);
+
             return $info['update_time'];
         }
+
         return  $update_time;
     }
 
     private function getRedisKey()
     {
-        return $this->dao_info->getDbName() . '|' . $this->dao_info->getTableName();
+        return $this->dao_info->getDbName().'|'.$this->dao_info->getTableName();
     }
 
     private function updateUpdateTime()
     {
         $key = $this->getRedisKey();
         $info = [
-            'database' => $this->dao_info->getDbName(),
-            'table' => $this->dao_info->getTableName(),
+            'database'    => $this->dao_info->getDbName(),
+            'table'       => $this->dao_info->getTableName(),
             'update_time' => $this->generateUpdateTime(),
         ];
         $this->cache_tag_dao->insertOnDuplicateKeyUpdate($info);
         $this->redis->set($key, $info['update_time']);
+
         return  $info;
     }
+
     /**
      * 缓存策略一
      * memcache里缓存查询结果 key由database table
      * 表更新时间存放在db中，并在redis中缓存
      * 更新操作，包括插入和删除，成功之后，更新表更新时间(db+redis)
-     * 频繁的插入更改的情况下，缓存效率较低
-     *
-     *
+     * 频繁的插入更改的情况下，缓存效率较低.
      */
 
     /**
@@ -124,9 +126,11 @@ class CachedDaoProcessor
      * @param $order
      * @param $force_write
      * @param $callback
-     * @return array|bool|int|string
+     *
      * @throws \Exception
-     * SELECT * FROM test WHERE id > 1 order by id desc limit 1,10
+     *                    SELECT * FROM test WHERE id > 1 order by id desc limit 1,10
+     *
+     * @return array|bool|int|string
      */
     public function find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false, $callback = null)
     {
@@ -137,6 +141,7 @@ class CachedDaoProcessor
         } else {
             $info = $this->processor->find($where, $offset, $limit, $order, $fields, $force_write, $callback);
             $this->memcache->set($memcached_key, json_encode($info));
+
             return $info;
         }
     }
@@ -146,6 +151,7 @@ class CachedDaoProcessor
         $callback = function ($params) {
             return is_array($params) ? current($params) : null;
         };
+
         return $this->find($where, 0, 1, null, null, $force_write, $callback);
     }
 
@@ -154,22 +160,24 @@ class CachedDaoProcessor
         return $this->find([$this->dao_info->getPk() => $pks], null, null, null, null, $force_write, $callback);
     }
 
-
     public function findById($pk, $force_write = false)
     {
         $callback = function ($params) {
             return is_array($params) ? current($params) : null;
         };
+
         return $this->findByIds([$pk], $force_write, $callback);
     }
 
     public function findCount($where, $force_write = false)
     {
-        $field = "COUNT(1) as c";
+        $field = 'COUNT(1) as c';
         $callback = function ($params) {
             $data = is_array($params) ? current($params) : [];
+
             return $data['c'] ?: 0;
         };
+
         return $this->find($where, 0, 1, null, $field, $force_write, $callback);
     }
 
@@ -182,6 +190,7 @@ class CachedDaoProcessor
         if ($res) {
             $this->updateUpdateTime();
         }
+
         return $res;
     }
 }

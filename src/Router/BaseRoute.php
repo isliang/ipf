@@ -3,15 +3,15 @@
  * User: isliang
  * Date: 2019/9/26
  * Time: 10:16
- * Email: wslhdu@163.com
+ * Email: wslhdu@163.com.
  **/
 
 namespace Ipf\Router;
 
 use FastRoute\RouteCollector;
+use function FastRoute\simpleDispatcher;
 use Ipf\Config\ConfigChecker;
 use Ipf\Config\ConfigLoader;
-use function FastRoute\simpleDispatcher;
 
 abstract class BaseRoute
 {

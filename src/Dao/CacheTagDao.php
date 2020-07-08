@@ -1,4 +1,5 @@
 <?php
+
 namespace Ipf\Dao;
 
 class CacheTagDao extends BaseDao
@@ -12,6 +13,7 @@ class CacheTagDao extends BaseDao
         $dao_info->setTableName('cache_tag');
         $dao_info->setPk('id');
         $dao_info->setSkipCache(true);
+
         return $dao_info;
     }
 }

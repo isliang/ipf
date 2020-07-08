@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019-09-14
  * Time: 12:14
- * Email: yesuhuangsi@163.com
+ * Email: yesuhuangsi@163.com.
  **/
 
 namespace Ipf\Dao;
@@ -13,8 +13,8 @@ use Ipf\Exception\MethodNotExistException;
 use Ipf\Pool\MysqlPool;
 
 /**
- * Class BaseDao
- * @package Ipf\Dao
+ * Class BaseDao.
+ *
  * @method find($where, $offset = CommConst::DEFAULT_SQL_OFFSET, $limit = CommConst::DEFAULT_SQL_LIMIT, $order = null, $fields = null, $force_write = false)
  * @method findOne($where, $force_write = false)
  * @method findByIds($pks, $force_write = false)
@@ -62,8 +62,7 @@ abstract class BaseDao
         $this->pool_write = new MysqlPool($this->dao_info->getMasterDsn());
         $this->processor = $this->dao_info->isSkipCache() ?
             new DaoProcessor($this->dao_info, $this->pool_read, $this->pool_write) :
-            new CachedDaoProcessor($this->dao_info, $this->pool_read, $this->pool_write)
-        ;
+            new CachedDaoProcessor($this->dao_info, $this->pool_read, $this->pool_write);
     }
 
     /**
@@ -73,22 +72,26 @@ abstract class BaseDao
     {
         $class = get_called_class();
         if (empty(self::$instance[$class])) {
-            self::$instance[$class] = new $class;
+            self::$instance[$class] = new $class();
         }
+
         return self::$instance[$class];
     }
 
     /**
      * @param $name
      * @param $arguments
-     * @return mixed
+     *
      * @throws MethodNotExistException
+     *
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
         if (method_exists($this->processor, $name)) {
             return call_user_func_array([$this->processor, $name], $arguments);
         }
+
         throw new MethodNotExistException(get_called_class(), $name);
     }
 }

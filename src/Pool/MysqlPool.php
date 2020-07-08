@@ -3,7 +3,7 @@
  * User: isliang
  * Date: 2019/9/17
  * Time: 11:03
- * Email: wslhdu@163.com
+ * Email: wslhdu@163.com.
  **/
 
 namespace Ipf\Pool;
@@ -23,7 +23,6 @@ class MysqlPool
     private $size = 0;
     private $config;
 
-
     public function __construct($name)
     {
         $config = ConfigLoader::getConfig('database', $name);
@@ -32,8 +31,9 @@ class MysqlPool
     }
 
     /**
-     * @return \PDO
      * @throws MysqlNoUsableConnectionException
+     *
+     * @return \PDO
      */
     public function getConnection()
     {
@@ -47,8 +47,10 @@ class MysqlPool
                 $this->config['dsn'],
                 $this->config['username'],
                 $this->config['password'],
-                $this->config['options']);
+                $this->config['options']
+            );
             $this->size++;
+
             return $pdo;
         }
     }
@@ -62,15 +64,15 @@ class MysqlPool
             $result = $stmt->execute($params);
             if ($result) {
                 switch ($type) {
-                    case "SELECT":
+                    case 'SELECT':
                         $result = $stmt->fetchAll(\PDO::FETCH_CLASS);
                         break;
-                    case "INSERT":
-                    case "REPLACE":
+                    case 'INSERT':
+                    case 'REPLACE':
                         $result = $mysql->lastInsertId();
                         break;
-                    case "UPDATE":
-                    case "DELETE":
+                    case 'UPDATE':
+                    case 'DELETE':
                         $result = $stmt->rowCount();
                         break;
                 }
@@ -85,7 +87,7 @@ class MysqlPool
             }
         }
         $this->pool[] = $mysql;
+
         return $callback ? call_user_func_array($callback, [$result]) : $result;
     }
-
 }
