@@ -65,7 +65,7 @@ class MysqlPool
             if ($result) {
                 switch ($type) {
                     case 'SELECT':
-                        $result = $stmt->fetchAll(\PDO::FETCH_CLASS);
+                        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                         break;
                     case 'INSERT':
                     case 'REPLACE':
