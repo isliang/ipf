@@ -13,18 +13,18 @@ use Ipf\Exception\ClassNotFoundException;
 use Ipf\Exception\MethodNotExistException;
 use Ipf\Exception\RequestMethodNotAllowedException;
 use Ipf\Exception\RouteNotFoundException;
+use Ipf\Factory\RequestFactory;
+use Ipf\Factory\ResponseFactory;
 
 class FpmRoute extends BaseRoute
 {
-    public static function dispatch($request, $response)
+    public static function dispatch()
     {
+        $request = RequestFactory::getInstance();
+        $response = ResponseFactory::getInstance();
         self::init();
-        $request_method = $_SERVER['REQUEST_METHOD'];
-        $uri = $_SERVER['REQUEST_URI'];
-        if (false !== $pos = strpos($uri, '?')) {
-            $uri = substr($uri, 0, $pos);
-        }
-        $uri = rawurldecode($uri);
+        $request_method = $request->getMethod();
+        $uri = $request->getUri()->getPath();
         $routeInfo = self::$dispatcher->dispatch($request_method, $uri);
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:

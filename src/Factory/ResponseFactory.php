@@ -8,7 +8,7 @@ class ResponseFactory
     /**
      * @return Response
      */
-    public function getInstance()
+    public static function getInstance()
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {

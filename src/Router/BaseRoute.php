@@ -40,5 +40,5 @@ abstract class BaseRoute
         }
     }
 
-    abstract public static function dispatch($request, $response);
+    abstract public static function dispatch();
 }

@@ -8,7 +8,7 @@ class RequestFactory
     /**
      * @return Request
      */
-    public function getInstance()
+    public static function getInstance()
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {
