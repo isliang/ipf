@@ -8,8 +8,8 @@
 
 namespace Ipf\Pool;
 
-use Ipf\Config\ConfigChecker;
-use Ipf\Config\ConfigLoader;
+use Ipf\Utils\ConfigChecker;
+use Ipf\Utils\ConfigLoader;
 use Ipf\Constant\CommConst;
 use Ipf\Constant\ExceptionConst;
 use Ipf\Exception\MysqlNoUsableConnectionException;

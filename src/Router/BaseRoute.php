@@ -10,8 +10,8 @@ namespace Ipf\Router;
 
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
-use Ipf\Config\ConfigChecker;
-use Ipf\Config\ConfigLoader;
+use Ipf\Utils\ConfigChecker;
+use Ipf\Utils\ConfigLoader;
 
 abstract class BaseRoute
 {

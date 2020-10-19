@@ -9,8 +9,8 @@
 
 namespace Ipf\Factory;
 
-use Ipf\Config\ConfigChecker;
-use Ipf\Config\ConfigLoader;
+use Ipf\Utils\ConfigChecker;
+use Ipf\Utils\ConfigLoader;
 use Predis\Client;
 
 class RedisFactory

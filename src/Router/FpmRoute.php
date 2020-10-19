@@ -38,7 +38,7 @@ class FpmRoute extends BaseRoute
                 if (!method_exists($class, $handler)) {
                     throw new MethodNotExistException($class, $handler);
                 }
-                call_user_func_array([new $class(), $handler], []);
+                call_user_func_array([new $class($request, $response), $handler], []);
                 break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new RequestMethodNotAllowedException($request_method, $uri);

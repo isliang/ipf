@@ -6,7 +6,7 @@
  * Email: yesuhuangsi@163.com.
  **/
 
-namespace Ipf\Config;
+namespace Ipf\Utils;
 
 use Ipf\Exception\ConfigPathUndefinedException;
 
