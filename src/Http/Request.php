@@ -69,7 +69,7 @@ class Request
 
     public function getPost($name = null)
     {
-        if (empty($this->post) && $post = $this->request->getBody()) {
+        if (empty($this->post) && $post = (string)$this->request->getBody()) {
             switch ($this->getHeader('HTTP_CONTENT_TYPE')) {
                 case 'application/x-www-form-urlencoded':
                     parse_str($post, $this->post);
@@ -85,7 +85,7 @@ class Request
     public function getHeader($name = null)
     {
         return is_null($name) ? $this->request->getHeaders() :
-            $this->request->getHeader($name);
+            $this->request->getHeaderLine($name);
     }
 
     /**
