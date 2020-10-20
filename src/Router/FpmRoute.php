@@ -13,15 +13,16 @@ use Ipf\Exception\ClassNotFoundException;
 use Ipf\Exception\MethodNotExistException;
 use Ipf\Exception\RequestMethodNotAllowedException;
 use Ipf\Exception\RouteNotFoundException;
-use Ipf\Factory\RequestFactory;
-use Ipf\Factory\ResponseFactory;
+use Ipf\Http\Request;
 
 class FpmRoute extends BaseRoute
 {
     public static function dispatch()
     {
-        $request = RequestFactory::getInstance();
-        $response = ResponseFactory::getInstance();
+        /**
+         * @var $request Request
+         */
+        $request = Request::getInstance();
         self::init();
         $request_method = $request->getMethod();
         $uri = $request->getUri()->getPath();
@@ -38,7 +39,7 @@ class FpmRoute extends BaseRoute
                 if (!method_exists($class, $handler)) {
                     throw new MethodNotExistException($class, $handler);
                 }
-                call_user_func_array([new $class($request, $response), $handler], []);
+                call_user_func_array([new $class($request), $handler], []);
                 break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new RequestMethodNotAllowedException($request_method, $uri);

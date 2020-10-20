@@ -1,8 +1,15 @@
 <?php
 namespace Ipf\Http;
 
+use Ipf\Exception\MethodNotExistException;
 use Ipf\Utils\TSingleton;
 
+/**
+ * Class Request
+ * @package Ipf\Http
+ * @method getMethod()
+ * @method getUri()
+ */
 class Request
 {
     use TSingleton;
@@ -71,5 +78,22 @@ class Request
     {
         return is_null($name) ? $this->request->getHeaders() :
             $this->request->getHeader($name);
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     *
+     * @throws MethodNotExistException
+     *
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this->request, $name)) {
+            return call_user_func_array([$this->request, $name], $arguments);
+        }
+
+        throw new MethodNotExistException(get_called_class(), $name);
     }
 }

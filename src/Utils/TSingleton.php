@@ -11,6 +11,7 @@ trait TSingleton
     {
 
     }
+
     public static function getInstance()
     {
         static $instance = null;

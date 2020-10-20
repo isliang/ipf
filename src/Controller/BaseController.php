@@ -1,8 +1,7 @@
 <?php
 namespace Ipf\Controller;
 
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use Ipf\Http\Request;
 
 abstract class BaseController
 {
@@ -12,18 +11,11 @@ abstract class BaseController
     protected $request;
 
     /**
-     * @var Response
-     */
-    protected $response;
-
-    /**
      * BaseController constructor.
      * @param $request Request
-     * @param $response Response
      */
-    public function __construct($request, $response)
+    public function __construct($request)
     {
         $this->request = $request;
-        $this->response = $response;
     }
 }
