@@ -19,9 +19,6 @@ class FpmRoute extends BaseRoute
 {
     public static function dispatch()
     {
-        /**
-         * @var $request Request
-         */
         $request = Request::getInstance();
         self::init();
         $request_method = $request->getMethod();

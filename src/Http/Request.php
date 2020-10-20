@@ -2,7 +2,6 @@
 namespace Ipf\Http;
 
 use Ipf\Exception\MethodNotExistException;
-use Ipf\Utils\TSingleton;
 
 /**
  * Class Request
@@ -12,7 +11,6 @@ use Ipf\Utils\TSingleton;
  */
 class Request
 {
-    use TSingleton;
     /**
      * @var \GuzzleHttp\Psr7\Request
      */
@@ -28,9 +26,7 @@ class Request
      */
     private $post = [];
 
-    private $is_init = false;
-
-    public function __construct()
+    private function __construct()
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {
@@ -44,6 +40,18 @@ class Request
             $headers,
             file_get_contents('php://input')
         );
+    }
+
+    /**
+     * @return Request
+     */
+    public static function getInstance()
+    {
+        static $instance = null;
+        if (!$instance) {
+            $instance = new self();
+        }
+        return $instance;
     }
 
     /**
