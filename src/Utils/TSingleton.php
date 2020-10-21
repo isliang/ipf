@@ -18,9 +18,9 @@ trait TSingleton
         if (!$instance) {
             $ref = new \ReflectionClass(get_called_class());
             $ctor = $ref->getConstructor();
-            $self = $ref->newInstanceWithoutConstructor();
+            $instance = $ref->newInstanceWithoutConstructor();
             $ctor->setAccessible(true);
-            $instance = $ctor->invokeArgs($self, func_get_args());
+            $ctor->invokeArgs($instance, func_get_args());
         }
         return $instance;
     }

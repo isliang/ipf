@@ -2,6 +2,7 @@
 namespace Ipf\Http;
 
 use Ipf\Exception\MethodNotExistException;
+use Ipf\Utils\TSingleton;
 
 /**
  * Class Request
@@ -11,6 +12,8 @@ use Ipf\Exception\MethodNotExistException;
  */
 class Request
 {
+    use TSingleton;
+
     /**
      * @var \GuzzleHttp\Psr7\Request
      */
@@ -40,18 +43,6 @@ class Request
             $headers,
             file_get_contents('php://input')
         );
-    }
-
-    /**
-     * @return Request
-     */
-    public static function getInstance()
-    {
-        static $instance = null;
-        if (!$instance) {
-            $instance = new self();
-        }
-        return $instance;
     }
 
     /**
