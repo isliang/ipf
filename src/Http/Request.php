@@ -69,7 +69,8 @@ class Request
 
     public function getPost($name = null)
     {
-        $content_type = $this->request->getHeader('HTTP_CONTENT_TYPE')[0];
+        $content_type = $this->getHeader('HTTP_CONTENT_TYPE');
+        $content_type = explode(';', $content_type)[0];
         switch ($content_type) {
             case 'application/x-www-form-urlencoded':
                 if (empty($this->post) && $post = (string)$this->request->getBody()) {
