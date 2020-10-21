@@ -69,26 +69,22 @@ class Request
 
     public function getPost($name = null)
     {
-        $content_type = $this->getHeader('HTTP_CONTENT_TYPE');
-        $content_type = explode(';', $content_type)[0];
-        switch ($content_type) {
-            case 'application/x-www-form-urlencoded':
-                if (empty($this->post) && $post = (string)$this->request->getBody()) {
+        if (empty($this->post) && $post = (string)$this->request->getBody()) {
+            switch ($this->getHeader('HTTP_CONTENT_TYPE')) {
+                case 'application/x-www-form-urlencoded':
                     parse_str($post, $this->post);
-                }
-                break;
-            case 'application/json':
-                if (empty($this->post) && $post = (string)$this->request->getBody()) {
+                    break;
+                case 'application/json':
                     $this->post = json_decode($post, true);
-                }
-                break;
-            case 'multipart/form-data':
-                if (empty($this->post) && $_FILES) {
-                    $this->post = $_FILES;
-                }
-                break;
+                    break;
+            }
         }
         return is_null($name) ? $this->post : $this->post[$name];
+    }
+
+    public function getFile($name = null)
+    {
+        return is_null($name) ? $_FILES : $_FILES[$name];
     }
 
     public function getHeader($name = null)
