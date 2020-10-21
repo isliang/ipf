@@ -77,6 +77,9 @@ class Request
                 case 'application/json':
                     $this->post = json_decode($post, true);
                     break;
+                case 'multipart/form-data':
+                    $this->post = $_FILES;
+                    break;
             }
         }
         return is_null($name) ? $this->post : $this->post[$name];
