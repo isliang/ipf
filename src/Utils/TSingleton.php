@@ -14,14 +14,15 @@ trait TSingleton
 
     public static function getInstance()
     {
-        static $instance = null;
-        if (!$instance) {
-            $ref = new \ReflectionClass(get_called_class());
+        static $instance = [];
+        $class = get_called_class();
+        if (!$instance[$class]) {
+            $ref = new \ReflectionClass($class);
             $ctor = $ref->getConstructor();
-            $instance = $ref->newInstanceWithoutConstructor();
+            $instance[$class] = $ref->newInstanceWithoutConstructor();
             $ctor->setAccessible(true);
-            $ctor->invokeArgs($instance, func_get_args());
+            $ctor->invokeArgs($instance[$class], func_get_args());
         }
-        return $instance;
+        return $instance[$class];
     }
 }

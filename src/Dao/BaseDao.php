@@ -11,6 +11,7 @@ namespace Ipf\Dao;
 use Ipf\Constant\CommConst;
 use Ipf\Exception\MethodNotExistException;
 use Ipf\Pool\MysqlPool;
+use Ipf\Utils\TSingleton;
 
 /**
  * Class BaseDao.
@@ -28,6 +29,8 @@ use Ipf\Pool\MysqlPool;
  */
 abstract class BaseDao
 {
+    use TSingleton;
+
     /**
      * @var DaoInfo
      */
