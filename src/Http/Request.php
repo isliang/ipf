@@ -34,7 +34,8 @@ class Request
         $headers = [];
         foreach ($_SERVER as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
-                $headers[$key] = $value;
+                $k = str_replace('_', '-', substr($key, 5));
+                $headers[$k] = $value;
             }
         }
         $this->request = new \GuzzleHttp\Psr7\Request(
@@ -61,7 +62,7 @@ class Request
     public function getPost($name = null)
     {
         if (empty($this->post) && $post = (string)$this->request->getBody()) {
-            switch ($this->getHeader('HTTP_CONTENT_TYPE')) {
+            switch ($this->getHeader('content-type')) {
                 case 'application/x-www-form-urlencoded':
                     parse_str($post, $this->post);
                     break;
@@ -82,6 +83,15 @@ class Request
     {
         return is_null($name) ? $this->request->getHeaders() :
             $this->request->getHeaderLine($name);
+    }
+
+    public function getIp()
+    {
+        $ip = $this->getHeader('client-ip') ?: $this->getHeader('x-forward-for') ?: $this->getHeader('remote-addr');
+        $arr = explode(',', $ip);
+        $ip = trim(end($arr));
+        $ip = long2ip(ip2long($ip));
+        return $ip;
     }
 
     /**
