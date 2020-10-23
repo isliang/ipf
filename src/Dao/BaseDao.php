@@ -67,19 +67,6 @@ abstract class BaseDao
     }
 
     /**
-     * @return BaseDao
-     */
-    public static function getInstance()
-    {
-        $class = get_called_class();
-        if (empty(self::$instance[$class])) {
-            self::$instance[$class] = new $class();
-        }
-
-        return self::$instance[$class];
-    }
-
-    /**
      * @param $name
      * @param $arguments
      *
