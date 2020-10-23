@@ -87,7 +87,7 @@ class Request
 
     public function getIp()
     {
-        $ip = $this->getHeader('client-ip') ?: $this->getHeader('x-forward-for') ?: $this->getHeader('remote-addr');
+        $ip = $this->getHeader('client-ip') ?: $this->getHeader('x-forward-for') ?: $_SERVER['REMOTE_ADDR'];
         $arr = explode(',', $ip);
         $ip = trim(end($arr));
         $ip = long2ip(ip2long($ip));
