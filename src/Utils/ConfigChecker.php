@@ -8,6 +8,8 @@
 
 namespace Ipf\Utils;
 
+use Ipf\Exception\EncryptConfigFormatErrorException;
+use Ipf\Exception\EncryptConfigNotFoundException;
 use Ipf\Exception\LogConfigFormatErrorException;
 use Ipf\Exception\LogConfigNotFoundException;
 use Ipf\Exception\MemcachedConfigFormatErrorException;
@@ -85,6 +87,16 @@ class ConfigChecker
             if (empty($domain) || empty($port)) {
                 throw new MemcachedConfigFormatErrorException();
             }
+        }
+    }
+
+    public static function checkEncryptConfig($name, $param)
+    {
+        if (empty($param) || !is_array($param)) {
+            throw new EncryptConfigNotFoundException($name);
+        }
+        if (empty($param['cipher']) || empty($param['key']) || empty($param['iv'])) {
+            throw new EncryptConfigFormatErrorException($name);
         }
     }
 }

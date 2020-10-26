@@ -11,7 +11,7 @@ namespace Ipf\Dao;
 use Ipf\Constant\CommConst;
 use Ipf\Factory\LogFactory;
 use Ipf\Pool\MysqlPool;
-use Ipf\Utils\SqlBuilderUtils;
+use Ipf\Utils\SqlBuilder;
 
 class DaoProcessor
 {
@@ -83,7 +83,7 @@ class DaoProcessor
     {
         $params = [];
         $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
+        $where_info = SqlBuilder::buildWhere($where);
         if (!empty($where_info)) {
             $where_sql = $where_info['sql'];
             $params = array_merge($params, $where_info['values']);
@@ -92,10 +92,10 @@ class DaoProcessor
         $offset = is_null($offset) ? CommConst::DEFAULT_SQL_OFFSET : $offset;
         $limit = is_null($limit) ? CommConst::DEFAULT_SQL_LIMIT : $limit;
 
-        $sql = 'SELECT '.SqlBuilderUtils::buildFields($fields).
+        $sql = 'SELECT '.SqlBuilder::buildFields($fields).
             ' FROM '.$this->dao_info->getTableName().
             $where_sql.
-            SqlBuilderUtils::buildOrder($order).
+            SqlBuilder::buildOrder($order).
             " LIMIT {$offset}, {$limit}";
 
         return $this->executeSql($sql, $params, $force_write, $callback);
@@ -163,7 +163,7 @@ class DaoProcessor
 
         $ignore = $is_ignore ? 'IGNORE' : '';
         $sql = "INSERT {$ignore} INTO ".$this->dao_info->getTableName().
-            '('.SqlBuilderUtils::buildFields($fields).') values '
+            '('.SqlBuilder::buildFields($fields).') values '
             .$value_sql;
 
         return $this->executeSql($sql, $values);
@@ -191,8 +191,8 @@ class DaoProcessor
         }
         $value_sql = '('.implode(',', array_fill(0, count($fields), '?')).')';
         $sql = 'INSERT INTO '.$this->dao_info->getTableName().
-            '('.SqlBuilderUtils::buildFields($fields).') values '
-            .$value_sql.' ON DUPLICATE KEY UPDATE '.SqlBuilderUtils::buildWhereFields($fields);
+            '('.SqlBuilder::buildFields($fields).') values '
+            .$value_sql.' ON DUPLICATE KEY UPDATE '.SqlBuilder::buildWhereFields($fields);
 
         return $this->executeSql($sql, array_merge($values, $values));
     }
@@ -218,14 +218,14 @@ class DaoProcessor
             $values[] = $v;
         }
         $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
+        $where_info = SqlBuilder::buildWhere($where);
         if (!empty($where_info)) {
             $where_sql = $where_info['sql'];
             $values = array_merge($values, $where_info['values']);
         }
 
         $sql = 'UPDATE '.$this->dao_info->getTableName().' SET '
-            .SqlBuilderUtils::buildWhereFields($fields).$where_sql;
+            .SqlBuilder::buildWhereFields($fields).$where_sql;
 
         return $this->executeSql($sql, $values);
     }
@@ -240,7 +240,7 @@ class DaoProcessor
      */
     public function delete($where)
     {
-        $where_info = SqlBuilderUtils::buildWhere($where);
+        $where_info = SqlBuilder::buildWhere($where);
         if (empty($where_info)) {
             return false;
         }
@@ -280,14 +280,14 @@ class DaoProcessor
         $count = abs(intval($count));
         $values = [];
         $where_sql = '';
-        $where_info = SqlBuilderUtils::buildWhere($where);
+        $where_info = SqlBuilder::buildWhere($where);
         if (!empty($where_info)) {
             $where_sql = $where_info['sql'];
             $values = $where_info['values'];
         }
 
         $sql = 'UPDATE '.$this->dao_info->getTableName().' SET '
-            .SqlBuilderUtils::buildUpdateFields([$field => $count], $increase).$where_sql;
+            .SqlBuilder::buildUpdateFields([$field => $count], $increase).$where_sql;
 
         return $this->executeSql($sql, $values);
     }
