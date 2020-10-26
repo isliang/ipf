@@ -29,13 +29,22 @@ class Request
      */
     private $post = [];
 
+    private $cookies = [];
+
+    private $files = [];
+
     private function __construct()
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
                 $k = str_replace('_', '-', substr($key, 5));
-                $headers[$k] = $value;
+                if ($k == 'COOKIE') {
+                    $cookies = str_replace('; ','&', $value);
+                    parse_str($cookies, $this->cookies);
+                } else {
+                    $headers[$k] = $value;
+                }
             }
         }
         $this->request = new \GuzzleHttp\Psr7\Request(
@@ -44,6 +53,20 @@ class Request
             $headers,
             file_get_contents('php://input')
         );
+        //query param
+        parse_str($this->request->getUri()->getQuery(), $this->query);
+        //post param
+        $post = (string)$this->request->getBody();
+        switch ($this->getHeader('content-type')) {
+            case 'application/x-www-form-urlencoded':
+                parse_str($post, $this->post);
+                break;
+            case 'application/json':
+                $this->post = json_decode($post, true);
+                break;
+        }
+        //file
+        $this->files = $_FILES;
     }
 
     /**
@@ -53,30 +76,17 @@ class Request
      */
     public function getQuery($name = null)
     {
-        if (empty($this->query) && $query = $this->request->getUri()->getQuery()) {
-            parse_str($query, $this->query);
-        }
         return is_null($name) ? $this->query : $this->query[$name];
     }
 
     public function getPost($name = null)
     {
-        if (empty($this->post) && $post = (string)$this->request->getBody()) {
-            switch ($this->getHeader('content-type')) {
-                case 'application/x-www-form-urlencoded':
-                    parse_str($post, $this->post);
-                    break;
-                case 'application/json':
-                    $this->post = json_decode($post, true);
-                    break;
-            }
-        }
         return is_null($name) ? $this->post : $this->post[$name];
     }
 
     public function getFile($name = null)
     {
-        return is_null($name) ? $_FILES : $_FILES[$name];
+        return is_null($name) ? $this->files : $this->files[$name];
     }
 
     public function getHeader($name = null)
@@ -92,6 +102,11 @@ class Request
         $ip = trim(end($arr));
         $ip = long2ip(ip2long($ip));
         return $ip;
+    }
+
+    public function getCookie($name = null)
+    {
+        return is_null($name) ? $this->cookies : $this->cookies[$name];
     }
 
     /**
