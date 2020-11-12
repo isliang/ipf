@@ -26,10 +26,4 @@ abstract class BaseController
         $this->request = $request;
         $this->response = $response;
     }
-
-    public function json(string $data)
-    {
-        $this->response->header('Content-type', 'application/json');
-        $this->response->send($data);
-    }
 }
