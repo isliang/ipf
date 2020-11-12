@@ -9,16 +9,15 @@ class RequestFactory
      * @param Request|null $request
      * @return RequestInterface|null
      */
-    public static function getInstance($request = null)
+    public static function getRequest($request = null)
     {
-        static $instance = null;
-        if (!$instance) {
-            if (PHP_SAPI == 'cli' && extension_loaded('swoole') &&
-                version_compare(phpversion('swoole'), '4.3', '>')) {
-                $instance = new SwooleRequest($request);
-            } elseif (PHP_SAPI == 'fpm-fcgi') {
-                $instance = new FpmRequest();
-            }
+        if (PHP_SAPI == 'cli' && extension_loaded('swoole') &&
+            version_compare(phpversion('swoole'), '4.3', '>')) {
+            $instance = new SwooleRequest($request);
+        } elseif (PHP_SAPI == 'fpm-fcgi') {
+            $instance = new FpmRequest();
+        } else {
+            $instance = null;
         }
         return $instance;
     }

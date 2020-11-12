@@ -27,14 +27,4 @@ class SwooleRequest extends RequestAbstract
         //file
         $this->files = $request->files;
     }
-
-    public function getMethod()
-    {
-        return $this->request->getMethod();
-    }
-
-    public function getUri()
-    {
-        return $this->request->getUri();
-    }
 }

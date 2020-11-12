@@ -30,8 +30,8 @@ class FastRoute extends BaseRoute
      */
     public static function dispatch($req = null, $res = null)
     {
-        $request = RequestFactory::getInstance($req);
-        $response = ResponseFactory::getInstance($res);
+        $request = RequestFactory::getRequest($req);
+        $response = ResponseFactory::getResponse($res);
         self::init();
         $request_method = $request->getMethod();
         $uri = $request->getUri()->getPath();

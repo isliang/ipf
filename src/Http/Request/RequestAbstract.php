@@ -7,8 +7,6 @@ use Ipf\Exception\MethodNotExistException;
 /**
  * Class RequestAbstract
  * @package Ipf\Http\Request
- * @method getMethod()
- * @method getUri()
  */
 abstract class RequestAbstract implements RequestInterface
 {
@@ -73,20 +71,13 @@ abstract class RequestAbstract implements RequestInterface
         return is_null($name) ? $this->cookies : $this->cookies[$name];
     }
 
-    /**
-     * @param $name
-     * @param $arguments
-     *
-     * @throws MethodNotExistException
-     *
-     * @return mixed
-     */
-    public function __call($name, $arguments)
+    public function getMethod()
     {
-        if (method_exists($this->request, $name)) {
-            return call_user_func_array([$this->request, $name], $arguments);
-        }
+        return $this->request->getMethod();
+    }
 
-        throw new MethodNotExistException(get_called_class(), $name);
+    public function getUri()
+    {
+        return $this->request->getUri();
     }
 }

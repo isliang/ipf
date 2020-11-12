@@ -8,12 +8,8 @@
 
 namespace Ipf\Repository;
 
-use Ipf\Utils\TSingleton;
-
 abstract class BaseRepository
 {
-    use TSingleton;
-
     public function __construct()
     {
         $this->initObject();
