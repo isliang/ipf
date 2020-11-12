@@ -15,9 +15,9 @@ class ResponseFactory
         if (!$instance) {
             if (PHP_SAPI == 'cli' && extension_loaded('swoole') &&
                 version_compare(phpversion('swoole'), '4.3', '>')) {
-                $instance = SwooleResponse::getInstance($response);
+                $instance = new SwooleResponse($response);
             } elseif (PHP_SAPI == 'fpm-fcgi') {
-                $instance = FpmResponse::getInstance();
+                $instance = new FpmResponse();
             }
         }
         return $instance;

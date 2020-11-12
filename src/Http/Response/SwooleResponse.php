@@ -2,13 +2,10 @@
 namespace Ipf\Http\Response;
 
 use Ipf\Constant\CommConst;
-use Ipf\Utils\TSingleton;
 use Swoole\Http\Response;
 
 class SwooleResponse extends ResponseAbstract
 {
-    use TSingleton;
-
     /**
      * @var Response
      */
@@ -18,7 +15,7 @@ class SwooleResponse extends ResponseAbstract
      * SwooleResponse constructor.
      * @param null|Response $response
      */
-    private function __construct($response = null)
+    public function __construct($response = null)
     {
         $this->response = $response;
     }

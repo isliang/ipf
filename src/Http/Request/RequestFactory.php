@@ -15,9 +15,9 @@ class RequestFactory
         if (!$instance) {
             if (PHP_SAPI == 'cli' && extension_loaded('swoole') &&
                 version_compare(phpversion('swoole'), '4.3', '>')) {
-                $instance = SwooleRequest::getInstance($request);
+                $instance = new SwooleRequest($request);
             } elseif (PHP_SAPI == 'fpm-fcgi') {
-                $instance = FpmRequest::getInstance();
+                $instance = new FpmRequest();
             }
         }
         return $instance;

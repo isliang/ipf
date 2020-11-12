@@ -1,23 +1,20 @@
 <?php
 namespace Ipf\Http\Request;
 
-use Ipf\Utils\TSingleton;
 use Swoole\Http\Request;
 
 class SwooleRequest extends RequestAbstract
 {
-    use TSingleton;
-
     /**
      * SwooleRequest constructor.
      * @param Request $request
      */
-    private function __construct($request = null)
+    public function __construct($request = null)
     {
         $this->server = $request->server;
         $this->request = new \GuzzleHttp\Psr7\Request(
             $this->server['request_method'],
-            $this->server['request_scheme'] . '://' . $this->server['server_name'] . $this->server['request_uri'],
+            $this->server['request_uri'],
             $request->header,
             $request->rawContent()
         );
@@ -29,5 +26,15 @@ class SwooleRequest extends RequestAbstract
         $this->cookies = $request->cookie;
         //file
         $this->files = $request->files;
+    }
+
+    public function getMethod()
+    {
+        return $this->request->getMethod();
+    }
+
+    public function getUri()
+    {
+        return $this->request->getUri();
     }
 }

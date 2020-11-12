@@ -1,13 +1,9 @@
 <?php
 namespace Ipf\Http\Request;
 
-use Ipf\Utils\TSingleton;
-
 class FpmRequest extends RequestAbstract
 {
-    use TSingleton;
-
-    private function __construct()
+    public function __construct()
     {
         $headers = [];
         foreach ($_SERVER as $key => $value) {

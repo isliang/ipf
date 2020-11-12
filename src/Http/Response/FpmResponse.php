@@ -1,18 +1,10 @@
 <?php
 namespace Ipf\Http\Response;
 
-use Ipf\Utils\TSingleton;
-
 class FpmResponse extends ResponseAbstract
 {
-    use TSingleton;
-
     private $header = [];
     private $status = 200;
-
-    private function __construct()
-    {
-    }
 
     public function status(int $status)
     {
