@@ -27,9 +27,8 @@ abstract class BaseController
         $this->response = $response;
     }
 
-    public function json($data)
+    public function json(string $data)
     {
-        $data = is_string($data) ? $data : json_encode($data);
         $this->response->header('Content-type', 'application/json');
         $this->response->send($data);
     }
