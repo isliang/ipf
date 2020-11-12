@@ -28,7 +28,9 @@ class FpmRequest extends RequestAbstract
         parse_str($this->request->getUri()->getQuery(), $this->query);
         //post param
         $post = (string)$this->request->getBody();
-        switch ($this->getHeader('content-type')) {
+        $content_type = $this->getHeader('content-type');
+        $content_type = explode(';', $content_type)[0];
+        switch ($content_type) {
             case 'application/x-www-form-urlencoded':
                 parse_str($post, $this->post);
                 break;
