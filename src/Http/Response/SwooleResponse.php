@@ -20,12 +20,12 @@ class SwooleResponse extends ResponseAbstract
         $this->response = $response;
     }
 
-    public function status(int $status)
+    public function status($status)
     {
         $this->response->status($status);
     }
 
-    public function header(string $key, string $value)
+    public function header($key, $value)
     {
         $this->response->header($key, $value);
     }
@@ -35,12 +35,12 @@ class SwooleResponse extends ResponseAbstract
         $this->response->cookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
 
-    public function redirect(string $url, int $code)
+    public function redirect($url, $code)
     {
         $this->response->redirect($url, $code);
     }
 
-    public function send(string $data)
+    public function send($data)
     {
         $size = CommConst::SIZE_RESPONSE_WRITE_BUFFER;
         while (strlen($data) > $size) {
