@@ -1,21 +1,29 @@
 <?php
 namespace Ipf\Controller;
 
-use Ipf\Http\Request;
+use Ipf\Http\Request\RequestInterface;
+use Ipf\Http\Response\ResponseInterface;
 
 abstract class BaseController
 {
     /**
-     * @var Request
+     * @var RequestInterface
      */
     protected $request;
 
     /**
-     * BaseController constructor.
-     * @param $request Request
+     * @var ResponseInterface
      */
-    public function __construct($request)
+    protected $response;
+
+    /**
+     * BaseController constructor.
+     * @param $request RequestInterface
+     * @param $response ResponseInterface
+     */
+    public function __construct($request, $response)
     {
         $this->request = $request;
+        $this->response = $response;
     }
 }

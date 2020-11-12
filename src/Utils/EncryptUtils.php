@@ -48,9 +48,9 @@ class EncryptUtils
             self::$config[$name] = $config;
         }
         return [
-            self::$config[$name]['cipher'],
-            self::$config[$name]['key'],
-            self::$config[$name]['iv'],
+            self::$config[$name]['cipher'],//aes-256-cbc
+            self::$config[$name]['key'],//openssl_random_pseudo_bytes(32)
+            self::$config[$name]['iv'],//openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'))
         ];
     }
 }
