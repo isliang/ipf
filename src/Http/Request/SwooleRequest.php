@@ -26,5 +26,11 @@ class SwooleRequest extends RequestAbstract
         $this->cookies = $request->cookie;
         //file
         $this->files = $request->files;
+        if (strpos($request->header['content-type'], 'application/json') === 0) {
+            $post = @json_decode($this->request->getBody(), true);
+            if ($post) {
+                $this->post = $this->post ? array_merge($this->post, $post) : $post;
+            }
+        }
     }
 }
