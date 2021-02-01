@@ -1,6 +1,7 @@
 <?php
 namespace Ipf\Http\Request;
 
+use Ipf\Utils\EnvUtils;
 use Swoole\Http\Request;
 
 class RequestFactory
@@ -11,8 +12,7 @@ class RequestFactory
      */
     public static function getRequest($request = null)
     {
-        if (PHP_SAPI == 'cli' && extension_loaded('swoole') &&
-            version_compare(phpversion('swoole'), '4.3', '>')) {
+        if (EnvUtils::isSwooleEnv()) {
             $instance = new SwooleRequest($request);
         } elseif (PHP_SAPI == 'fpm-fcgi') {
             $instance = new FpmRequest();
