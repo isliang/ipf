@@ -50,7 +50,7 @@ class DaoProcessor
         } else {
             $pool = $this->pool_read;
         }
-        LogFactory::getInstance('sql')->info($sql.':'.json_encode($params));
+//        LogFactory::getInstance('sql')->info($sql.':'.json_encode($params));
 
         return $pool->query($sql, $params, $type, $callback);
     }

@@ -28,11 +28,6 @@ class DaoInfo
     /**
      * @var string
      */
-    private $db_name;
-
-    /**
-     * @var string
-     */
     private $pk;
 
     /**
@@ -81,22 +76,6 @@ class DaoInfo
     public function setSlaveDsn(string $slave_dsn)
     {
         $this->slave_dsn = $slave_dsn;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDbName(): string
-    {
-        return $this->db_name;
-    }
-
-    /**
-     * @param string $db_name
-     */
-    public function setDbName(string $db_name)
-    {
-        $this->db_name = $db_name;
     }
 
     /**
